@@ -261,7 +261,7 @@ def Plot_FR_Cells(ax, cone_angles, rotation_vec, translation_vec, num_iter, box_
     box_limits is a list of the form [xmin, xmax, ymin, ymax],
     resolution is the distance between adjacent points in the grid,
     colour_map is a colourmap chosen from the matplotlib library,
-    max_iter is the maximum number of iterations of the TCE that the function allows before halting and returning a value,
+    max_iter is the maximum number of iterations of the TCE that the first return map allows before halting and returning a value,
     **kwargs are passed to the ax.scatter function."""
 
     XY = Generate_Lattice(box_limits, resolution)
