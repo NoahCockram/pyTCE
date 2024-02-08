@@ -191,25 +191,25 @@ def Generate_Lattice(box_limits, resolution):
 
 #--- Plotting functions (NOTE: Plots may not automatically show after the execution of these functions unless you execute plt.show() afterwards.)
 
-def Plot_TCE(ax, cone_angles, rotation_vec, translation_vec, box_limits, num_points, max_iter, colour_map, **kwargs):
+def Plot_TCE(ax, cone_angles, rotation_vec, translation_vec, box_limits, num_points, num_iter, colour_map, **kwargs):
     """This function plots a graph of the orbits of uniformly distributed points under the TCE with parameters cone_angles, rotation_vec and translation_vec.
     Each point and its iterates are given an arbitrary distinct colour.
     ax is an instance of the matplotlib Axes class,
     box_limits is a list of the form [xmin, xmax, ymin, ymax],
     num_points is the number of points being iterated,
-    max_iter is the number of iterates being computed for each point,
+    num_iter is the number of iterates being computed for each point,
     colour_map is a colourmap chosen from the matplotlib library,
     **Kwargs are passed to the ax.scatter function."""
     
     points = Generate_Random_Points(box_limits, num_points) #We rescale the elements of each vector so that the resulting vectors are within the box [xmin, xmax] x [ymin, ymax]
 
-    orbit = np.zeros((num_points*max_iter, 2))  #Preset the array which will store the trajectories of the points we have chosen.  The shape makes it easier to plot.
+    orbit = np.zeros((num_points*num_iter, 2))  #Preset the array which will store the trajectories of the points we have chosen.  The shape makes it easier to plot.
     orbit[:num_points,:] = points  #We start the array with the initial points (time t=0).
 
-    plot_colours = np.zeros(num_points*max_iter) 
+    plot_colours = np.zeros(num_points*num_iter) 
     plot_colours[:num_points] = list(range(1,num_points+1))
 
-    for n in tqdm(range(1,max_iter)):
+    for n in tqdm(range(1,num_iter)):
         for j in range(num_points):
             orbit[n*num_points+j], _  = TCE(orbit[(n-1)*num_points+j], cone_angles, rotation_vec, translation_vec)  #We calculate the next point in the trajectory.
             plot_colours[n*num_points + j] = j+1  #Ensuring that each trajectory has the same colour value as its initial point, and distinct trajetories have distinct colours.
@@ -323,7 +323,7 @@ def Plot_FR_Cells(ax, cone_angles, rotation_vec, translation_vec, num_iter, box_
 
 # box_limits = [-rho,l,0,0.7]
 # num_points = 500
-# max_iter = 1250 #Try to keep max_iter above 600, because in the Plot_TCE function, the first 600 iterates are removed from the plot as transients (to remove noise.)
+# num_iter = 1250 #Try to keep num_iter above 600, because in the Plot_TCE function, the first 600 iterates are removed from the plot as transients (to remove noise.)
 # colour_map = cm.get_cmap('viridis') #Check the available colourmaps for a list of choices.  My favourite for Plot_TCE is 'Blues'.
     
 # fig, ax1 = plt.subplots(nrows=1,ncols=1, figsize=(8,6)) #Initialising axes.  Feel free to change figsize to suit your screen.
@@ -331,7 +331,7 @@ def Plot_FR_Cells(ax, cone_angles, rotation_vec, translation_vec, num_iter, box_
 
 #--- Example execution of the plot functions
 
-# Plot_TCE(ax1, cone_angles, rotation_vec, translation_vec, box_limits, num_points, max_iter, colour_map, s=0.1, alpha=1, marker='o')
+# Plot_TCE(ax1, cone_angles, rotation_vec, translation_vec, box_limits, num_points, num_iter, colour_map, s=0.1, alpha=1, marker='o')
 # # Plot_TCE_Cells(ax1, cone_angles, rotation_vec, translation_vec, 10, box_limits, 2e-3, s=0.1, marker='o')
 # # Plot_FR_Cells(ax1, cone_angles, rotation_vec, translation_vec, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
 
