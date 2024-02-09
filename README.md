@@ -1,6 +1,6 @@
 Within this repository, you will find the programs which Noah Cockram has used to generate the figures in his papers with Peter Ashwin and Ana Rodrigues.
 
-pyTCE is a dependency for pyramid_map and trapezium_map (which you should be able to see from the 'import pyTCE_v1 as tce' lines near the beginning of both.
+pyTCE_v1 is a dependency for pyramid_map and trapezium_map (which you should be able to see from the 'import pyTCE_v1 as tce' lines near the beginning of both.
 Therefore, try to keep all files in the same folder.
 
 As said elsewhere, it is highly recommended that one runs these programs via a script (or simply by running the files themselves after uncommenting specific parts).
