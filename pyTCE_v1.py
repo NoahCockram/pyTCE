@@ -86,7 +86,7 @@ class Cone:
 
 #--- TCE computation     
 
-def Rotation_Angles(cone_angles, permutation):
+def rotation_angles(cone_angles, permutation):
     """This function computes the rotation angles for our piecewise isometry. 
     cone_angles is a numpy array containing the angle widths of each cone, in anti-clockwise order (right-to-left),
     permutation is a list of the integers 0, ..., number_of_cones - 1 representing the new ordering of the cones after they are exchanged,
@@ -110,7 +110,7 @@ def Rotation_Angles(cone_angles, permutation):
     return cone_rotations
 
 
-def TCE(point, cone_angles, rotation, translation):
+def tce(point, cone_angles, rotation, translation):
     """This function performs one iteration of a TCE.
     point is a numpy array representing a vector in the plane,
     cone_angles is a numpy array representing the angle widths of the cones in anti-clockwise order,
@@ -118,7 +118,7 @@ def TCE(point, cone_angles, rotation, translation):
     translation is a numpy array containing the amount each cone shifts under the TCE, again in anti-clockwise order.
     """
 
-    if point[1] < 0: # If x is not in the closed upper half plane, then this function doesn't work.
+    if point[1] < 0: # If point is not in the closed upper half plane, then this function doesn't work.
         print(point)
         raise Exception('point must have a non-negative y-coordinate.')
     
@@ -145,8 +145,8 @@ def TCE(point, cone_angles, rotation, translation):
             return new_point + translation[j], J
 
 
-def First_Return_Pc(point, cone_angles, rotation, translation, max_iter=1000):
-    """This function computes one iterate of the first return map of the TCE to the middle cone Pc.
+def first_return(point, cone_angles, rotation, translation, max_iter=1000):
+    """This function computes one iterate of the first return map of the TCE to the middle cone, that is to say the upper half plane without the first and last cones.
     point is a numpy array representing a vector in the plane,
     cone_angles is a numpy array representing the angle widths of the cones in anti-clockwise order,
     rotation is a numpy array containing the angles each cone rotates under the TCE, again in anti-clockwise order,
@@ -161,14 +161,14 @@ def First_Return_Pc(point, cone_angles, rotation, translation, max_iter=1000):
     for n in range(max_iter):
         if all(point == np.array([0, -1])):
             break
-        point_copy, _ = TCE(point_copy, cone_angles, rotation, translation)  #At each run of the for loop, we iterate the point under the TCE
+        point_copy, _ = tce(point_copy, cone_angles, rotation, translation)  #At each run of the for loop, we iterate the point under the TCE
 
         point_argument = np.arctan2(point_copy[1],point_copy[0])  #Calulating the argument of the point.
 
         if point_argument >= cone_angles[0] and point_argument <= np.pi - cone_angles[-1]:  #This checks whether the point has (re-)entered the middle cone.
             angle_sums = np.mod(angle_sums,1)
             return point_copy, n+1 
-            #If after n iterations, we return to the middle cone, we stop and return the point TCE^n(point) and the time n. 
+            #If after n iterations, we return to the middle cone, we stop and return the point tce^n(point) and the time n. 
             #Note: the index n starts from 0 to N-1, so we add 1.
 
     return np.array([0, -1]), -1   #It is impossible for this to be a valid output, so this serves as an indication that the function has reached max_iter without returning to the middle cone.
@@ -176,7 +176,7 @@ def First_Return_Pc(point, cone_angles, rotation, translation, max_iter=1000):
 
 #--- Functions for generating points
 
-def Generate_Random_Points(box_limits, num_points):
+def generate_random_points(box_limits, num_points):
     """This function generates an array of vectors uniformly distributed within a bounding box.
     box_limits is a list of the form [x_min, x_max, y_min, y_max],
     num_points is the number of points being generated."""
@@ -187,7 +187,7 @@ def Generate_Random_Points(box_limits, num_points):
     return points
 
 
-def Generate_Lattice(box_limits, resolution):
+def generate_grid(box_limits, resolution):
     """This function generates a uniform grid of points within a bounding box.
     box_limits is a list of the form [x_min, x_max, y_min, y_max],
     resolution is the distance between adjacent points in the grid."""
@@ -210,9 +210,9 @@ def Generate_Lattice(box_limits, resolution):
     return XY
 
 
-#--- Plotting functions (NOTE: Plots may not automatically show after the execution of these functions unless you execute plt.show() afterwards.)
+#--- Plotting functions
 
-def Plot_TCE(ax, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, **kwargs):
+def plot_tce(ax, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, **kwargs):
     """This function plots a graph of the orbits of uniformly distributed points under the TCE with parameters cone_angles, rotation and translation.
     Each point and its iterates are given an arbitrary distinct colour.
     ax is an instance of the matplotlib Axes class,
@@ -223,7 +223,7 @@ def Plot_TCE(ax, cone_angles, rotation, translation, box_limits, num_points, num
     **Kwargs are passed to the ax.scatter function."""
 
     #We rescale the elements of each vector so that the resulting vectors are within the box with limits [xmin, xmax] in x-coordinate and [ymin, ymax]in y-coordinate.
-    points = Generate_Random_Points(box_limits, num_points)
+    points = generate_random_points(box_limits, num_points)
 
     orbit = np.zeros((num_points*num_iter, 2))  #Preset the array which will store the trajectories of the points we have chosen.  The shape makes it easier to plot.
     orbit[:num_points, :] = points  #We initialise the array with the initial points (time t=0).
@@ -233,7 +233,7 @@ def Plot_TCE(ax, cone_angles, rotation, translation, box_limits, num_points, num
 
     for n in tqdm(range(1, num_iter)):
         for j in range(num_points):
-            orbit[n*num_points + j], _  = TCE(orbit[(n-1)*num_points + j], cone_angles, rotation, translation)  #We calculate the next point in the trajectory.
+            orbit[n*num_points + j], _  = tce(orbit[(n-1)*num_points + j], cone_angles, rotation, translation)  #We calculate the next point in the trajectory.
             plot_colours[n*num_points + j] = j + 1  #Ensuring that each trajectory has the same colour value as its initial point, and distinct trajetories have distinct colours.
 
     plot_colours = plot_colours/(num_points + 2)
@@ -243,7 +243,7 @@ def Plot_TCE(ax, cone_angles, rotation, translation, box_limits, num_points, num
     #...but this makes the final image look grainier/noisier, so we omit the first 600 iterates of each trajectories.
 
 
-def Plot_TCE_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits, resolution, **kwargs):
+def plot_tce_cells(ax, cone_angles, rotation, translation, num_iter, box_limits, resolution, **kwargs):
     """This function plots the n-cells for the TCE with parameters from cone_angles, rotation, translation, where n = num_iter.
     ax is an instance of the matplotlib Axes class,
     box_limits is a list of the form [xmin, xmax, ymin, ymax],
@@ -252,7 +252,7 @@ def Plot_TCE_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits,
 
     number_of_cones = np.size(cone_angles)
 
-    grid = Generate_Lattice(box_limits, resolution)
+    grid = generate_grid(box_limits, resolution)
     numel = grid.shape[0]
 
     colour_choices = [[1, 0, 0], [0, 1, 0], [0, 0, 1]] #These are the colour choices assigned to the first, middle and last cones
@@ -262,7 +262,7 @@ def Plot_TCE_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits,
 
     for _ in tqdm(range(1, num_iter + 1)):
         for i in range(numel):
-            grid[i], j = TCE(grid[i], cone_angles, rotation, translation)
+            grid[i], j = tce(grid[i], cone_angles, rotation, translation)
             if j == 0: #The cones the first, middle and last cones are each assigned a different colour from colour_choices.
                 jstar = 0
             elif j == number_of_cones - 1:
@@ -286,7 +286,7 @@ def Plot_FR_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits, 
     max_iter is the maximum number of iterations of the TCE that the first return map allows before halting and returning a value,
     **kwargs are passed to the ax.scatter function."""
 
-    grid = Generate_Lattice(box_limits, resolution)
+    grid = generate_grid|(box_limits, resolution)
 
     points = np.empty((0,2))
 
@@ -299,11 +299,11 @@ def Plot_FR_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits, 
     points_size = points.shape[0]
     
     initial_points = copy(points)   #This array stores the original state of the points for the purpose of plotting.
-    TCE_pts = np.zeros((points_size, 2))     #This array will store the points after transformation by the exchange part of the TCE, 
+    tce_points = np.zeros((points_size, 2))     #This array will store the points after transformation by the exchange part of the TCE, 
                                             #and plotting them reveals the partition of the first return map into alternating rhombi. 
 
     for i in range(points_size):
-        TCE_pts[i], _ = TCE(points[i], cone_angles, rotation, translation)
+        tce_points[i], _ = tce(points[i], cone_angles, rotation, translation)
 
     first_return_times = np.zeros(points_size) #The first return times will determine the colouring of each point.
 
@@ -312,7 +312,7 @@ def Plot_FR_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits, 
     for _ in tqdm(range(num_iter)):
         for i in range(points_size):
             
-            points[i], first_return_time = First_Return_Pc(points[i], cone_angles, rotation, translation, max_iter=max_iter)
+            points[i], first_return_time = first_return(points[i], cone_angles, rotation, translation, max_iter=max_iter)
 
             first_return_times[i] += first_return_time
     
@@ -322,7 +322,7 @@ def Plot_FR_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits, 
     #- The first plot will show the n-cells in their original positions
     ax.scatter(initial_points[:, 0], initial_points[:, 1], c=colour_map(colour_values), **kwargs)
     #- The second plot will show the n-cells after permuting the cones in the middle cone
-    # ax.scatter(TCE_pts[:,0]-translation_vec[1,0],TCE_pts[:,1],c=colour_map(colour_values),**kwargs)
+    # ax.scatter(tce_points[:,0]-translation_vec[1,0],tce_points[:,1],c=colour_map(colour_values),**kwargs)
     #- the third plot will show the n-cells after n iterates of the first return map.
     # ax.scatter(points[:,0],points[:,1],c=colour_map(colour_values),**kwargs)
 
@@ -333,7 +333,7 @@ def Plot_FR_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits, 
 
 # cone_angles = np.array([np.pi/2 - 0.7, 0.8, 0.6, np.pi/2 - 0.7])
 # permutation = np.array([0, 2, 1, 3])
-# rotation = Rotation_Angles(cone_angles, permutation)
+# rotation = rotation_angles(cone_angles, permutation)
 
 # l = (np.sqrt(5)-1)/2
 # eta = 1 - l
@@ -345,17 +345,17 @@ def Plot_FR_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits, 
 
 # box_limits = [-rho, l, 0, 0.7]
 # num_points = 500
-# num_iter = 1250 #Try to keep num_iter above 600, because in the Plot_TCE function, the first 600 iterates are removed from the plot as transients (to remove noise.)
-# colour_map = cm.get_cmap('viridis') #Check the available colourmaps for a list of choices.  My favourite for Plot_TCE is 'Blues'.
+# num_iter = 1250 #Try to keep num_iter above 600, because in the plot_tce function, the first 600 iterates are removed from the plot as transients (to remove noise.)
+# colour_map = cm.get_cmap('viridis') #Check the available colourmaps for a list of choices.  My favourite for plot_tce is 'Blues'.
     
 # fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(8, 6)) #Initialising axes.  Feel free to change figsize to suit your screen.
 
 
 #--- Example execution of the plot functions
 
-# Plot_TCE(ax1, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, s=0.1, alpha=1, marker='o')
-# Plot_TCE_Cells(ax1, cone_angles, rotation, translation, 10, box_limits, 2e-3, s=0.1, marker='o')
-# Plot_FR_Cells(ax1, cone_angles, rotation, translation, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
+# plot_tce(ax1, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, s=0.1, alpha=1, marker='o')
+# plot_tce_cells(ax1, cone_angles, rotation, translation, 10, box_limits, 2e-3, s=0.1, marker='o')
+# plot_fr_cells(ax1, cone_angles, rotation, translation, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
 
 # ax1.set_aspect(1)    #This ensures that there is no artificial stretching/squishing in the axes for the final image.
 # ax1.set_xlim(box_limits[0], box_limits[1]) #You can change these values if you wish, but keep in mind only the trajectories of points starting in box_limits are generated.
