@@ -29,25 +29,51 @@ from tqdm import tqdm
 #    I use it primarily for demonstrations and figures, but it has no use in any further code.
 
 class Cone:
-    def __init__(self, pos, width, angle):  #I defined this class in case I wanted to make demonstrations/figures to showcase what the cones do under the action of a TCE
-        self.pos = pos  #Any cone is defined by three parameters, the position of its vertex, and the angles of the two boundary rays originating from it from the horizontal.
-        self.width = width  #The angle of the cone at its vertex, measured in the anti-clockwise direction.
-        self.angle = angle  #The anti-clockwise angle between the horizontal and one of the boundary lines.
+    def __init__(self, vertex, width, angle):  #I defined this class in case I wanted to make demonstrations/figures to showcase what the cones do under the action of a TCE
+        self.__vertex = vertex  #Any cone is defined by three parameters, the position of its vertex, and the angles of the two boundary rays originating from it from the horizontal.
+        self.__width = width  #The angle of the cone at its vertex, measured in the anti-clockwise direction.
+        self.__angle = angle  #The anti-clockwise angle between the horizontal and one of the boundary lines.
         #Note that the first boundary line is determined by self.angle, and the second one is determined from the first using self.width
     
+    @property
+    def vertex(self):
+        return self.__vertex
+
+    @vertex.setter
+    def vertex(self, new_vertex):
+        self.__vertex = new_vertex
+
+    @property
+    def width(self):
+        return self.__width
+
+    @width.setter
+    def vertex(self, new_width):
+        if new_width <= 0:
+            raise ValueError("The width of the cone must be positive")
+        self.__width = new_width
+
+    @property
+    def angle(self):
+        return self.__angle
+
+    @angle.setter
+    def vertex(self, new_angle):
+        self.__angle = new_angle
+
     def vertices(self, radius): #This function generates the vertices of the triangle created by cutting off the boundary lines at a radius from the vertex
         """The vertices are ordered as follows: the origin of the cone, 
         the vertex with the smaller angle relative to the horizontal line going through the origin, then the vertex with the larger angle."""
-        v1 = self.pos
-        v2 = self.pos + radius*np.array([np.cos(self.angle), np.sin(self.angle)])
-        v3 = self.pos + radius*np.array([np.cos(self.angle + self.width), np.sin(self.angle + self.width)])
+        v1 = self.vertex
+        v2 = self.vertex + radius*np.array([np.cos(self.angle), np.sin(self.angle)])
+        v3 = self.vertex + radius*np.array([np.cos(self.angle + self.width), np.sin(self.angle + self.width)])
         return v1, v2, v3
     
     def rotate(self, rotation_angle):   #This rotates the entire cone.
         self.angle += rotation_angle
     
-    def translate(self, translation_vector):   #This translates the entire cone.
-        self.pos += translation_vector
+    def translate(self, translation):   #This translates the entire cone.
+        self.vertex += translation
     
     def hollow_plot(self, ax, radius, **kwargs):    #This plots the boundary of the cone, consisting of the vertex and its two boundary rays (up to the radius)
         v1, v2, v3 = self.vertices(radius)
@@ -55,7 +81,7 @@ class Cone:
 
     def filled_plot(self, ax, radius, **kwargs):    #This function plots a filled-in triangle with vertices determined by self.vertices(radius)
         v1, v2, v3 = self.vertices(radius)
-        ax.fill([v2[0],v1[0],v3[0]], [v2[1],v1[1],v3[1]],**kwargs)
+        ax.fill([v2[0], v1[0], v3[0]], [v2[1], v1[1], v3[1]], **kwargs)
 
 
 #--- TCE computation     
