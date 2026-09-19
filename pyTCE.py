@@ -134,15 +134,15 @@ def tce(point, cone_angles, rotation, translation):
             rotation_matrix = np.array([[np.cos(rotation[j]),-np.sin(rotation[j])], # Rotation matrix for the jth cone
                                         [np.sin(rotation[j]), np.cos(rotation[j])]])
             new_point = np.dot(rotation_matrix, point) # The rotated point 
+            point_angle += rotation[j]
             break
     
-    new_point_angle = np.arctan2(new_point[1],new_point[0])
     current_cone = 0
-    for j in range(np.size(cone_angles)):
-        current_cone += cone_angles[j]
+    for k in range(np.size(cone_angles)):
+        current_cone += cone_angles[k]
 
-        if new_point_angle <= current_cone:
-            return new_point + translation[j], J
+        if point_angle <= current_cone:
+            return new_point + translation[k], J
 
 
 def first_return(point, cone_angles, rotation, translation, max_iter=1000):
@@ -348,7 +348,7 @@ def plot_first_return_cells(ax, cone_angles, rotation, translation, num_iter, bo
 # num_iter = 1250 #Try to keep num_iter above 600, because in the plot_tce function, the first 600 iterates are removed from the plot as transients (to remove noise.)
 # colour_map = cm.get_cmap('viridis') #Check the available colourmaps for a list of choices.  My favourite for plot_tce is 'Blues'.
     
-# fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(8, 6)) #Initialising axes.  Feel free to change figsize to suit your screen.
+# fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(12, 8)) #Initialising axes.  Feel free to change figsize to suit your screen.
 
 
 #--- Example execution of the plot functions
