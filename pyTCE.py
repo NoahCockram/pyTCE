@@ -17,7 +17,7 @@
 #---------
 
 #- There are notes further down the code which are important to read.  Mainly at the beginning of the sections marked by '#---'
-#- ...but also try to read the comments at the end of the Plot_TCE, Plot_TCE_Cells and Plot_FR_Cells functions.
+#- ...but also try to read the comments at the end of the plot_tce, plot_tce_Cells and plot_first_return_cells functions.
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -277,7 +277,7 @@ def plot_tce_cells(ax, cone_angles, rotation, translation, num_iter, box_limits,
 
 
 
-def Plot_FR_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits, resolution, colour_map, max_iter=1000, **kwargs):
+def plot_first_return_cells(ax, cone_angles, rotation, translation, num_iter, box_limits, resolution, colour_map, max_iter=1000, **kwargs):
     """This function plots the n-cells, where n = num_iter, for the first return map of the TCE with parameters cone_angles, rotation, translation, to the middle cone.
     The colouring of a point is determined by the sequence of first return times to the middle cone in its orbit up to num_iter.
     box_limits is a list of the form [xmin, xmax, ymin, ymax],
@@ -355,7 +355,7 @@ def Plot_FR_Cells(ax, cone_angles, rotation, translation, num_iter, box_limits, 
 
 # plot_tce(ax1, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, s=0.1, alpha=1, marker='o')
 # plot_tce_cells(ax1, cone_angles, rotation, translation, 10, box_limits, 2e-3, s=0.1, marker='o')
-# plot_fr_cells(ax1, cone_angles, rotation, translation, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
+# plot_first_return_cells(ax1, cone_angles, rotation, translation, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
 
 # ax1.set_aspect(1)    #This ensures that there is no artificial stretching/squishing in the axes for the final image.
 # ax1.set_xlim(box_limits[0], box_limits[1]) #You can change these values if you wish, but keep in mind only the trajectories of points starting in box_limits are generated.
