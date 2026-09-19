@@ -92,21 +92,14 @@ def rotation_angles(cone_angles, permutation):
     permutation is a list of the integers 0, ..., number_of_cones - 1 representing the new ordering of the cones after they are exchanged,
     where d is the number of cones in the partition."""
 
-    number_of_cones = np.size(cone_angles)
-    cone_rotations = np.zeros(number_of_cones)
-    
-    for j in range(number_of_cones): #Loop to find rotation angle for each cone
-        permuted_angle_sum = 0
-        for k in range(number_of_cones): #The sum of the angles of cones that appear before the jth cone after permutation
-            if permutation[k] < permutation[j]:
-                permuted_angle_sum += cone_angles[k]
-        
-        angle_sum = 0
-        for k in range(j): #The sum of the angles of cones that appear before the jth cone before permutation
-            angle_sum += cone_angles[k]
-        
-        cone_rotations[j] = permuted_angle_sum - angle_sum #The difference is the rotation angle
-    
+    permuted_cone_angles = [cone_angles[j] for j in permutation]
+    cone_rotations = []
+    angle_sum = 0
+
+    for j in range(len(cone_angles)): #Loop to find rotation angle for each cone
+        cone_rotations += [sum(permuted_cone_angles[:permutation[j]]) - angle_sum] #The difference is the rotation angle
+        angle_sum += cone_angles[j]
+
     return cone_rotations
 
 
@@ -325,14 +318,14 @@ def plot_first_return_cells(ax, cone_angles, rotation, translation, num_iter, bo
     
 #NOTE: It is recommended with this code that you run it via a script rather than on the command line
 
-cone_angles = np.array([np.pi/2 - 0.7, 0.8, 0.6, np.pi/2 - 0.7])
+cone_angles = [np.pi/2 - 0.7, 0.8, 0.6, np.pi/2 - 0.7]
 permutation = np.array([0, 2, 1, 3])
 rotation = rotation_angles(cone_angles, permutation)
 
 l = (np.sqrt(5)-1)/2
 eta = 1 - l
 rho = 1
-translation = np.zeros((cone_angles.shape[0], 2))
+translation = np.zeros((len(cone_angles), 2))
 translation[1:-1, 0] = -eta
 translation[0, 0] = -rho
 translation[-1, 0] = l
