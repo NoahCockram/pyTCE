@@ -117,8 +117,9 @@ def tce(point, cone_angles, rotation, translation):
     
     point_angle = np.arctan2(point[1],point[0]) #The argument of the point x.
 
+    new_point = np.zeros(2)
     current_cone = 0    # This is the argument of the right boundary line of the cone j, starting from cone 0.
-    for j in range(np.size(cone_angles)):
+    for j in range(len(cone_angles)):
         current_cone += cone_angles[j]
 
         if point_angle <= current_cone:
@@ -127,10 +128,9 @@ def tce(point, cone_angles, rotation, translation):
             SIN = np.sin(rotation[j])
             temp_point_x = point[0]
             temp_point_y = point[1]
-            point[0] = COS*temp_point_x - SIN*temp_point_y + translation[j,0]
-            point[1] = SIN*temp_point_x + COS*temp_point_y + translation[j,1]
-            return point, j
-
+            new_point[0] = COS*temp_point_x - SIN*temp_point_y + translation[j,0]
+            new_point[1] = SIN*temp_point_x + COS*temp_point_y + translation[j,1]
+            return new_point, j
 
 def first_return(point, cone_angles, rotation, translation, max_iter=1000):
     """This function computes one iterate of the first return map of the TCE to the middle cone, that is to say the upper half plane without the first and last cones.
@@ -170,7 +170,7 @@ def generate_random_points(box_limits, num_points):
 
     x_min, x_max, y_min, y_max = box_limits
     choices = np.random.rand(2, num_points) #generating uniformly distributed 2D vectors within the box [0,1)x[0,1)
-    points = np.multiply(choices, np.array([x_max - x_min, y_max - y_min])[:,None]).T + np.array([x_min, y_min]) #Deforming the randomly generated points into the bounding box
+    points = list(np.multiply(choices, np.array([x_max - x_min, y_max - y_min])[:,None]).T + np.array([x_min, y_min])) #Deforming the randomly generated points into the bounding box
     return points
 
 
@@ -212,19 +212,21 @@ def plot_tce(ax, cone_angles, rotation, translation, box_limits, num_points, num
     #We rescale the elements of each vector so that the resulting vectors are within the box with limits [xmin, xmax] in x-coordinate and [ymin, ymax]in y-coordinate.
     points = generate_random_points(box_limits, num_points)
 
-    orbit = np.zeros((num_points*num_iter, 2))  #Preset the array which will store the trajectories of the points we have chosen.  The shape makes it easier to plot.
-    orbit[:num_points, :] = points  #We initialise the array with the initial points (time t=0).
+    # orbit = np.zeros((num_points*num_iter, 2))  #Preset the array which will store the trajectories of the points we have chosen.  The shape makes it easier to plot.
+    # orbit[:num_points, :] = points  #We initialise the array with the initial points (time t=0).
 
-    plot_colours = [j/(num_points + 2) for j in range(1, num_points + 1)]*num_iter
+    orbit = [np.zeros(2) for _ in range(num_points*num_iter)]
+    orbit[:num_points] = points
 
     for n in tqdm(range(1, num_iter)):
         for j in range(num_points):
-            orbit[n*num_points + j], _  = tce(orbit[(n-1)*num_points + j], cone_angles, rotation, translation)  #We calculate the next point in the trajectory.
-            # plot_colours[n*num_points + j] = j + 1  #Ensuring that each trajectory has the same colour value as its initial point, and distinct trajetories have distinct colours.
+            points[j], _ = tce(points[j], cone_angles, rotation, translation) # Calculate the next point in the trajectory
+        orbit[n*num_points:(n+1)*num_points] = points
 
-    # plot_colours = plot_colours/(num_points + 2)
+
+    plot_colours = [j/(num_points + 2) for j in range(1, num_points + 1)]*num_iter
     
-    ax.scatter(orbit[600*num_points:, 0], orbit[600*num_points:, 1], c=colour_map(plot_colours[600*num_points:]), **kwargs)
+    ax.scatter([a[0] for a in orbit[600*num_points:]], [a[1] for a in orbit[600*num_points:]], c=colour_map(plot_colours[600*num_points:]), **kwargs)
     #Some orbits start with a transient part where they drift around before entering a periodic island, 
     #...but this makes the final image look grainier/noisier, so we omit the first 600 iterates of each trajectories.
 
@@ -317,35 +319,35 @@ def plot_first_return_cells(ax, cone_angles, rotation, translation, num_iter, bo
     
 #NOTE: It is recommended with this code that you run it via a script rather than on the command line
 
-# if __name__=='__main__':
+if __name__=='__main__':
 
-#     cone_angles = [np.pi/2 - 0.7, 0.8, 0.6, np.pi/2 - 0.7]
-#     permutation = np.array([0, 2, 1, 3])
-#     rotation = rotation_angles(cone_angles, permutation)
+    cone_angles = [np.pi/2 - 0.7, 0.8, 0.6, np.pi/2 - 0.7]
+    permutation = np.array([0, 2, 1, 3])
+    rotation = rotation_angles(cone_angles, permutation)
 
-#     l = (np.sqrt(5)-1)/2
-#     eta = 1 - l
-#     rho = 1
-#     translation = np.zeros((len(cone_angles), 2))
-#     translation[1:-1, 0] = -eta
-#     translation[0, 0] = -rho
-#     translation[-1, 0] = l
+    l = (np.sqrt(5)-1)/2
+    eta = 1 - l
+    rho = 1
+    translation = np.zeros((len(cone_angles), 2))
+    translation[1:-1, 0] = -eta
+    translation[0, 0] = -rho
+    translation[-1, 0] = l
 
-#     box_limits = [-rho, l, 0, 0.7]
-#     num_points = 500
-#     num_iter = 1250 #Try to keep num_iter above 600, because in the plot_tce function, the first 600 iterates are removed from the plot as transients (to remove noise.)
-#     colour_map = cm.get_cmap('Blues') #Check the available colourmaps for a list of choices.  My favourite for plot_tce is 'Blues'.
+    box_limits = [-rho, l, 0, 0.7]
+    num_points = 500
+    num_iter = 1250 #Try to keep num_iter above 600, because in the plot_tce function, the first 600 iterates are removed from the plot as transients (to remove noise.)
+    colour_map = cm.get_cmap('Blues') #Check the available colourmaps for a list of choices.  My favourite for plot_tce is 'Blues'.
         
-#     fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(12, 8)) #Initialising axes.  Feel free to change figsize to suit your screen.
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(12, 8)) #Initialising axes.  Feel free to change figsize to suit your screen.
 
 
-#     # --- Example execution of the plot functions
+    # --- Example execution of the plot functions
 
-#     plot_tce(ax1, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, s=0.1, alpha=1, marker='o')
-#     # plot_tce_cells(ax1, cone_angles, rotation, translation, 10, box_limits, 2e-3, s=0.1, marker='o')
-#     # plot_first_return_cells(ax1, cone_angles, rotation, translation, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
+    plot_tce(ax1, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, s=0.1, alpha=1, marker='o')
+    # plot_tce_cells(ax1, cone_angles, rotation, translation, 10, box_limits, 2e-3, s=0.1, marker='o')
+    # plot_first_return_cells(ax1, cone_angles, rotation, translation, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
 
-#     ax1.set_aspect(1)    #This ensures that there is no artificial stretching/squishing in the axes for the final image.
-#     ax1.set_xlim(box_limits[0], box_limits[1]) #You can change these values if you wish, but keep in mind only the trajectories of points starting in box_limits are generated.
-#     ax1.set_ylim(box_limits[2], box_limits[3]) #So if the trajectories don't reach the part of the image you want to view, you will need to change box_limits.
-#     plt.show()
+    ax1.set_aspect(1)    #This ensures that there is no artificial stretching/squishing in the axes for the final image.
+    ax1.set_xlim(box_limits[0], box_limits[1]) #You can change these values if you wish, but keep in mind only the trajectories of points starting in box_limits are generated.
+    ax1.set_ylim(box_limits[2], box_limits[3]) #So if the trajectories don't reach the part of the image you want to view, you will need to change box_limits.
+    plt.show()
