@@ -215,15 +215,14 @@ def plot_tce(ax, cone_angles, rotation, translation, box_limits, num_points, num
     orbit = np.zeros((num_points*num_iter, 2))  #Preset the array which will store the trajectories of the points we have chosen.  The shape makes it easier to plot.
     orbit[:num_points, :] = points  #We initialise the array with the initial points (time t=0).
 
-    plot_colours = np.zeros(num_points*num_iter) 
-    plot_colours[:num_points] = list(range(1, num_points + 1))
+    plot_colours = [j/(num_points + 2) for j in range(1, num_points + 1)]*num_iter
 
     for n in tqdm(range(1, num_iter)):
         for j in range(num_points):
             orbit[n*num_points + j], _  = tce(orbit[(n-1)*num_points + j], cone_angles, rotation, translation)  #We calculate the next point in the trajectory.
-            plot_colours[n*num_points + j] = j + 1  #Ensuring that each trajectory has the same colour value as its initial point, and distinct trajetories have distinct colours.
+            # plot_colours[n*num_points + j] = j + 1  #Ensuring that each trajectory has the same colour value as its initial point, and distinct trajetories have distinct colours.
 
-    plot_colours = plot_colours/(num_points + 2)
+    # plot_colours = plot_colours/(num_points + 2)
     
     ax.scatter(orbit[600*num_points:, 0], orbit[600*num_points:, 1], c=colour_map(plot_colours[600*num_points:]), **kwargs)
     #Some orbits start with a transient part where they drift around before entering a periodic island, 
@@ -320,33 +319,33 @@ def plot_first_return_cells(ax, cone_angles, rotation, translation, num_iter, bo
 
 # if __name__=='__main__':
 
-    # cone_angles = [np.pi/2 - 0.7, 0.8, 0.6, np.pi/2 - 0.7]
-    # permutation = np.array([0, 2, 1, 3])
-    # rotation = rotation_angles(cone_angles, permutation)
+#     cone_angles = [np.pi/2 - 0.7, 0.8, 0.6, np.pi/2 - 0.7]
+#     permutation = np.array([0, 2, 1, 3])
+#     rotation = rotation_angles(cone_angles, permutation)
 
-    # l = (np.sqrt(5)-1)/2
-    # eta = 1 - l
-    # rho = 1
-    # translation = np.zeros((len(cone_angles), 2))
-    # translation[1:-1, 0] = -eta
-    # translation[0, 0] = -rho
-    # translation[-1, 0] = l
+#     l = (np.sqrt(5)-1)/2
+#     eta = 1 - l
+#     rho = 1
+#     translation = np.zeros((len(cone_angles), 2))
+#     translation[1:-1, 0] = -eta
+#     translation[0, 0] = -rho
+#     translation[-1, 0] = l
 
-    # box_limits = [-rho, l, 0, 0.7]
-    # num_points = 500
-    # num_iter = 1250 #Try to keep num_iter above 600, because in the plot_tce function, the first 600 iterates are removed from the plot as transients (to remove noise.)
-    # colour_map = cm.get_cmap('Blues') #Check the available colourmaps for a list of choices.  My favourite for plot_tce is 'Blues'.
+#     box_limits = [-rho, l, 0, 0.7]
+#     num_points = 500
+#     num_iter = 1250 #Try to keep num_iter above 600, because in the plot_tce function, the first 600 iterates are removed from the plot as transients (to remove noise.)
+#     colour_map = cm.get_cmap('Blues') #Check the available colourmaps for a list of choices.  My favourite for plot_tce is 'Blues'.
         
-    # fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(12, 8)) #Initialising axes.  Feel free to change figsize to suit your screen.
+#     fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(12, 8)) #Initialising axes.  Feel free to change figsize to suit your screen.
 
 
-    #--- Example execution of the plot functions
+#     # --- Example execution of the plot functions
 
-    # plot_tce(ax1, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, s=0.1, alpha=1, marker='o')
-    # plot_tce_cells(ax1, cone_angles, rotation, translation, 10, box_limits, 2e-3, s=0.1, marker='o')
-    # plot_first_return_cells(ax1, cone_angles, rotation, translation, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
+#     plot_tce(ax1, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, s=0.1, alpha=1, marker='o')
+#     # plot_tce_cells(ax1, cone_angles, rotation, translation, 10, box_limits, 2e-3, s=0.1, marker='o')
+#     # plot_first_return_cells(ax1, cone_angles, rotation, translation, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
 
-    # ax1.set_aspect(1)    #This ensures that there is no artificial stretching/squishing in the axes for the final image.
-    # ax1.set_xlim(box_limits[0], box_limits[1]) #You can change these values if you wish, but keep in mind only the trajectories of points starting in box_limits are generated.
-    # ax1.set_ylim(box_limits[2], box_limits[3]) #So if the trajectories don't reach the part of the image you want to view, you will need to change box_limits.
-    # plt.show()
+#     ax1.set_aspect(1)    #This ensures that there is no artificial stretching/squishing in the axes for the final image.
+#     ax1.set_xlim(box_limits[0], box_limits[1]) #You can change these values if you wish, but keep in mind only the trajectories of points starting in box_limits are generated.
+#     ax1.set_ylim(box_limits[2], box_limits[3]) #So if the trajectories don't reach the part of the image you want to view, you will need to change box_limits.
+#     plt.show()
