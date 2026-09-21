@@ -273,7 +273,7 @@ def plot_first_return_cells(ax, cone_angles, rotation, translation, num_iter, bo
     max_iter is the maximum number of iterations of the TCE that the first return map allows before halting and returning a value,
     **kwargs are passed to the ax.scatter function."""
 
-    grid = generate_grid|(box_limits, resolution)
+    grid = generate_grid(box_limits, resolution)
 
     points = np.empty((0,2))
 
@@ -340,9 +340,9 @@ fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(12, 8)) #Initialising axes.  
 
 #--- Example execution of the plot functions
 
-plot_tce(ax1, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, s=0.1, alpha=1, marker='o')
+# plot_tce(ax1, cone_angles, rotation, translation, box_limits, num_points, num_iter, colour_map, s=0.1, alpha=1, marker='o')
 # plot_tce_cells(ax1, cone_angles, rotation, translation, 10, box_limits, 2e-3, s=0.1, marker='o')
-# plot_first_return_cells(ax1, cone_angles, rotation, translation, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
+plot_first_return_cells(ax1, cone_angles, rotation, translation, 1, box_limits, 2.5e-3, colour_map, max_iter=10000, s=0.3, marker='o')
 
 ax1.set_aspect(1)    #This ensures that there is no artificial stretching/squishing in the axes for the final image.
 ax1.set_xlim(box_limits[0], box_limits[1]) #You can change these values if you wish, but keep in mind only the trajectories of points starting in box_limits are generated.
