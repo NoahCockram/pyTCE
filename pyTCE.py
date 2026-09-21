@@ -97,7 +97,7 @@ def rotation_angles(cone_angles, permutation):
     angle_sum = 0
 
     for j in range(len(cone_angles)): #Loop to find rotation angle for each cone
-        cone_rotations += [sum(permuted_cone_angles[:permutation[j]]) - angle_sum] #The difference is the rotation angle
+        cone_rotations.append(sum(permuted_cone_angles[:permutation[j]]) - angle_sum) #The difference is the rotation angle
         angle_sum += cone_angles[j]
 
     return cone_rotations
