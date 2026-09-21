@@ -212,19 +212,15 @@ def plot_tce(ax, cone_angles, rotation, translation, box_limits, num_points, num
     #We rescale the elements of each vector so that the resulting vectors are within the box with limits [xmin, xmax] in x-coordinate and [ymin, ymax]in y-coordinate.
     points = generate_random_points(box_limits, num_points)
 
-    # orbit = np.zeros((num_points*num_iter, 2))  #Preset the array which will store the trajectories of the points we have chosen.  The shape makes it easier to plot.
-    # orbit[:num_points, :] = points  #We initialise the array with the initial points (time t=0).
-
-    orbit = [np.zeros(2) for _ in range(num_points*num_iter)]
-    orbit[:num_points] = points
+    orbit = [np.zeros(2) for _ in range(num_points*num_iter)] # Instantiate empty list to store point orbits
+    orbit[:num_points] = points # Fill initial conditions
 
     for n in tqdm(range(1, num_iter)):
         for j in range(num_points):
-            points[j], _ = tce(points[j], cone_angles, rotation, translation) # Calculate the next point in the trajectory
-        orbit[n*num_points:(n+1)*num_points] = points
+            points[j], _ = tce(points[j], cone_angles, rotation, translation) # Calculate the next point in the jth trajectory
+        orbit[n*num_points:(n+1)*num_points] = points # Store each slice of time in batches
 
-
-    plot_colours = [j/(num_points + 2) for j in range(1, num_points + 1)]*num_iter
+    plot_colours = [j/(num_points + 2) for j in range(1, num_points + 1)]*num_iter # Assign a colours so that all points in each trajectory share the same colour
     
     ax.scatter([a[0] for a in orbit[600*num_points:]], [a[1] for a in orbit[600*num_points:]], c=colour_map(plot_colours[600*num_points:]), **kwargs)
     #Some orbits start with a transient part where they drift around before entering a periodic island, 
