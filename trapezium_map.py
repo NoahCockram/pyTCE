@@ -22,7 +22,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import pyTCE_v1 as tce
+import pyTCE as tce
 import matplotlib.cm as cm
 from copy import copy
 from tqdm import tqdm

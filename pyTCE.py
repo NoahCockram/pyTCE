@@ -117,9 +117,17 @@ def tce(point, cone_angles, rotation, translation):
     
     point_angle = np.arctan2(point[1],point[0]) #The argument of the point x.
 
+    # If point is in either of the two outermost cones, the tce is a simple horizontal shift. 
+    # This is worth the special case as any point will spend most of its time in either of these cones.
+    if point_angle > np.pi-cone_angles[-1]:
+        return point + translation[-1], len(cone_angles)
+    if point_angle <= cone_angles[0]:
+        return point + translation[0], 0
+
     new_point = np.zeros(2)
-    current_cone = 0    # This is the argument of the right boundary line of the cone j, starting from cone 0.
-    for j in range(len(cone_angles)):
+    current_cone = cone_angles[0] # This is the argument of the right boundary line of the cone j, starting from cone 0.
+
+    for j in range(1,len(cone_angles)):
         current_cone += cone_angles[j]
 
         if point_angle <= current_cone:
